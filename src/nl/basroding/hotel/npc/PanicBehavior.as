@@ -69,7 +69,5 @@ package nl.basroding.hotel.npc
 			// TODO Auto Generated method stub
 			
 		}
-		
-		
 	}
 }

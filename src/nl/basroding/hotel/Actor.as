@@ -7,8 +7,8 @@ package nl.basroding.hotel
 
 	public class Actor extends FlxSprite
 	{
-		public static const CRAWL_SPEED:int = 30;
-		public static const WALK_SPEED:int = 50;
+		public static const CRAWL_SPEED:int = 10;
+		public static const WALK_SPEED:int = 30;
 		public static const RUN_SPEED:int = 110;
 		
 		protected var _room:Room;

@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <objecttypes>
- <objecttype name="door" color="#a40002"/>
+ <objecttype name="door" color="#e5d400"/>
+ <objecttype name="room" color="#a0a0a4"/>
+ <objecttype name="npc" color="#ff0018"/>
+ <objecttype name="waypoint" color="#ff01a0"/>
+ <objecttype name="switch" color="#30ff00"/>
 </objecttypes>
