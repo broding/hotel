@@ -18,7 +18,7 @@ package nl.basroding.hotel
 		
 		public function toggle(activator:Actor):void
 		{
-			_target.toggleSwitch();
+			_target.toggleSwitch(this);
 		}
 	}
 }

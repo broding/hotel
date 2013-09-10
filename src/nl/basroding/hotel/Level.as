@@ -109,6 +109,9 @@ package nl.basroding.hotel
 		 */
 		public function createRoute(waypoints:String):Route
 		{
+			if(waypoints.length == 0)
+				return new Route();
+			
 			var route:Route = new Route();
 			
 			var split:Array = waypoints.split(",");

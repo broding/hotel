@@ -2,6 +2,8 @@ package nl.basroding.hotel
 {
 	import net.pixelpracht.tmx.TmxPropertySet;
 	
+	import nl.basroding.hotel.events.RoomEvent;
+	import nl.basroding.hotel.npc.DeadBehavior;
 	import nl.basroding.hotel.npc.IBehavior;
 	import nl.basroding.hotel.path.IWaypoint;
 	import nl.basroding.hotel.path.Path;
@@ -11,21 +13,15 @@ package nl.basroding.hotel
 
 	public class Npc extends Actor
 	{
-		private var _route:Route;
 		private var _behavior:IBehavior;
 		
-		private var _currentWaypoint:FlxObject;
 		private var _moving:Boolean;
-		private var _path:Path;
 		
-		private var _target:FlxObject;
-		
-		public function Npc(route:Route, behavior:IBehavior, x:int, y:int, room:Room)
+		public function Npc(x:int, y:int, room:Room)
 		{
 			super(x, y, room);
 			
-			_route = route;
-			_behavior = behavior;
+			_behavior = new DeadBehavior();
 			
 			this.makeGraphic(16, 32, 0xff5500ff);
 		}
@@ -37,49 +33,55 @@ package nl.basroding.hotel
 		
 		public function startExcecution():void
 		{
+			this.behavior = new DeadBehavior();
 			this.alive = false;
 			this.velocity.x = 0;
 			this.makeGraphic(16, 32, 0xff5500ff);
+			
+			this._room.actorKilled(this);
 		}
 		
 		override public function update():void
 		{
 			super.update();
 			
-			if(_currentWaypoint == null)
-			{
-				_currentWaypoint = _route.target;
-				_path = Game.generatePath(this, _currentWaypoint as FlxObject);
-				_target = _path.target;
-			}
-			
 			if(alive)
 			{
-				if(_target != null)
-				{
-					if(_target.x > this.x)
-						this.velocity.x = WALK_SPEED;
-					else
-						this.velocity.x = -WALK_SPEED;
-				}
-				
-				if(this.overlaps(_currentWaypoint))
-				{
-					_currentWaypoint = _route.nextTarget();
-					_path = Game.generatePath(this, _currentWaypoint as FlxObject);
-					_target = _path.target;
-				}
+				_behavior.update();
 			}
 			
 		}
 		
-		public function collideDoor(door:Door):void
+		override public function set room(value:Room):void
 		{
-			if(door == _path.target)
-			{
-				this.useDoor(door);
-				_target = _path.nextTarget();
-			}
+			super.room = value;
+			
+			_room.addListener(this.behavior);
 		}
+		
+		override public function useDoor(door:Door):void
+		{
+			_room.removeListener(this.behavior);
+			super.useDoor(door);
+			_room.addListener(this.behavior);
+			this.behavior.onEnterRoom(_room);
+		}
+		
+		
+		public function get behavior():IBehavior
+		{
+			return _behavior;
+		}
+
+		public function set behavior(value:IBehavior):void
+		{
+			if(value == null)
+				value = new DeadBehavior();
+			
+			_room.removeListener(_behavior);
+			_behavior = value;
+			_room.addListener(_behavior);
+		}
+
 	}
 }

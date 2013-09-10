@@ -12,6 +12,7 @@ package nl.basroding.hotel
 		
 		private var _id:int;
 		private var _doors:Array;
+		private var _actors:Array;
 		private var _listeners:Array;
 		private var _shadow:FlxSprite;
 		
@@ -25,6 +26,7 @@ package nl.basroding.hotel
 			_listeners = new Array();
 			_id = _uniqueId++;
 			_doors = new Array();
+			_actors = new Array();
 			
 			_shadow = new FlxSprite().makeGraphic(width, height, 0xff000000);
 			_shadow.x = x;
@@ -40,7 +42,17 @@ package nl.basroding.hotel
 		
 		public function removeListener(listener:IRoomListener):void
 		{
-			_listeners.slice(_listeners.indexOf(listener), 1);
+			_listeners.splice(_listeners.indexOf(listener), 1);
+		}
+		
+		public function addActor(actor:Actor):void
+		{
+			_actors.push(actor);	
+		}
+		
+		public function removeActor(actor:Actor):void
+		{
+			_actors.splice(_actors.indexOf(actor), 1);
 		}
 
 		public function addDoor(door:Door):void
@@ -77,7 +89,7 @@ package nl.basroding.hotel
 			
 			for each(var listener:IRoomListener in _listeners)
 			{
-				(listener as IRoomListener).actorKilledInRoom(event);
+				(listener as IRoomListener).onActorKilledInRoom(event);
 			}
 		}
 		
@@ -91,9 +103,30 @@ package nl.basroding.hotel
 			return !_shadow.visible;
 		}
 		
-		public function toggleSwitch():void
+		public function toggleSwitch(mySwitch:Switch):void
 		{
 			_shadow.visible = _shadow.visible ? false : true;
+			
+			if(!_shadow.visible) // if lights have been turned out
+			{
+				var event:RoomEvent = new RoomEvent();
+				event.changedSwitch = mySwitch;
+				event.switchOn = !_shadow.visible;
+				
+				for each(var listener:IRoomListener in _listeners)
+					(listener as IRoomListener).onLightSwitch(event);
+			}
+		}
+		
+		public function hasDeadActor():Boolean
+		{
+			for each(var actor:Actor in _actors)
+			{
+				if(!actor.alive)
+					return true;
+			}
+			
+			return false;
 		}
 
 		public function get shadow():FlxSprite

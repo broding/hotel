@@ -7,6 +7,7 @@ package nl.basroding.hotel
 	import net.pixelpracht.tmx.*;
 	
 	import nl.basroding.hotel.npc.BehaviorFactory;
+	import nl.basroding.hotel.npc.PanicBehavior;
 	import nl.basroding.hotel.path.AdjacencyMatrix;
 	import nl.basroding.hotel.path.ConcreteWaypoint;
 	
@@ -51,7 +52,6 @@ package nl.basroding.hotel
 				FlxG.collide(player, collideMap);
 				FlxG.collide(npcs, collideMap);
 				FlxG.overlap(player, level.doors, player.collideDoorHandler);
-				FlxG.overlap(npcs, level.doors, collideNpcDoorHandler);
 				FlxG.overlap(player, npcs, player.collideNpcHandler);
 				FlxG.overlap(player, level.switches, player.collideSwitchHandler);
 			}
@@ -152,20 +152,15 @@ package nl.basroding.hotel
 					break;
 				case "npc":
 					var npc:Npc = new Npc(
-						level.createRoute(object.custom["waypoints"]), 
-						BehaviorFactory.createBehavior(object.custom["type"]),
 						object.x,
 						object.y,
 						level.getRoomOfPosition(object.x, object.y)
 					);
+					npc.behavior = BehaviorFactory.createBehavior(object.custom["type"], npc, level.createRoute(object.custom["waypoints"]));
+					//npc.behavior = new PanicBehavior(npc);
 					npcs.add(npc);
 					break;
 			}
-		}
-		
-		public function collideNpcDoorHandler(npc:Npc, door:Door):void
-		{
-			npc.collideDoor(door);
 		}
 	}
 }

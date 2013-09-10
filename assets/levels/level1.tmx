@@ -20070,10 +20070,16 @@
   <object name="1" type="waypoint" x="1152" y="368" width="16" height="16"/>
  </objectgroup>
  <objectgroup name="npc" width="100" height="100">
-  <object type="npc" x="1216" y="352" width="16" height="16">
+  <object type="npc" x="1216" y="352" width="16" height="32">
    <properties>
     <property name="type" value="guest"/>
     <property name="waypoints" value="0,1"/>
+   </properties>
+  </object>
+  <object type="npc" x="512" y="352" width="16" height="32">
+   <properties>
+    <property name="type" value="guest"/>
+    <property name="waypoints" value="0"/>
    </properties>
   </object>
  </objectgroup>
