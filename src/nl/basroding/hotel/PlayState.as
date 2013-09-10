@@ -52,6 +52,8 @@ package nl.basroding.hotel
 				FlxG.collide(npcs, collideMap);
 				FlxG.overlap(player, level.doors, player.collideDoorHandler);
 				FlxG.overlap(npcs, level.doors, collideNpcDoorHandler);
+				FlxG.overlap(player, npcs, player.collideNpcHandler);
+				FlxG.overlap(player, level.switches, player.collideSwitchHandler);
 			}
 		}
 		
@@ -82,7 +84,11 @@ package nl.basroding.hotel
 				spawnObject(object);
 				
 			group = tmx.getObjectGroup('waypoints');
-			for each(var object:TmxObject in group.objects)
+			for each(object in group.objects)
+				spawnObject(object);
+				
+			group = tmx.getObjectGroup('switch');
+			for each(object in group.objects)
 				spawnObject(object);
 				
 			// process level further
@@ -92,13 +98,17 @@ package nl.basroding.hotel
 			level.createAdjacencyMatrix();
 				
 			group = tmx.getObjectGroup('npc');
-			for each(var object:TmxObject in group.objects)
+			for each(object in group.objects)
 				spawnObject(object);
 				
-			
+			// add all shadows
+			for each(var room:Room in level.rooms.members)
+				level.shadows.add(room.shadow);
+				
+				
 			FlxG.worldBounds = sprites.getBounds();
 			
-			player = new Player();
+			player = new Player(500, 200, level.getRoomOfPosition(500, 200));
 			player.x = 500;
 			player.y = 200;
 			
@@ -111,8 +121,10 @@ package nl.basroding.hotel
 			fpsText.scrollFactor.y = 0;
 			
 			add(level.doors);
+			add(level.switches);
 			add(npcs);
 			add(player);
+			add(level.shadows);
 			add(fpsText);
 			
 			loaded = true;
@@ -134,10 +146,18 @@ package nl.basroding.hotel
 					var waypoint:ConcreteWaypoint = new ConcreteWaypoint(object.x, object.y, object.name);
 					level.waypoints.add(waypoint);
 					break;
+				case "switch":
+					var aSwitch:Switch = new Switch(object.x, object.y, level.getRoomOfPosition(object.x, object.y));
+					level.switches.add(aSwitch);
+					break;
 				case "npc":
-					var npc:Npc = new Npc(level.createRoute(object.custom["waypoints"]), BehaviorFactory.createBehavior(object.custom["type"]));
-					npc.x = object.x;
-					npc.y = object.y;
+					var npc:Npc = new Npc(
+						level.createRoute(object.custom["waypoints"]), 
+						BehaviorFactory.createBehavior(object.custom["type"]),
+						object.x,
+						object.y,
+						level.getRoomOfPosition(object.x, object.y)
+					);
 					npcs.add(npc);
 					break;
 			}

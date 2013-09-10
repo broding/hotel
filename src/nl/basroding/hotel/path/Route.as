@@ -9,7 +9,7 @@ package nl.basroding.hotel.path
 	public class Route
 	{
 		private var _route:Array;
-		private var _currentIndex;
+		private var _currentIndex:int;
 		private var _completed:Boolean;
 		
 		public var loop:Boolean;

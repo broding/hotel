@@ -20,12 +20,26 @@ package nl.basroding.hotel
 		
 		private var _target:FlxObject;
 		
-		public function Npc(route:Route, behavior:IBehavior)
+		public function Npc(route:Route, behavior:IBehavior, x:int, y:int, room:Room)
 		{
+			super(x, y, room);
+			
 			_route = route;
 			_behavior = behavior;
 			
+			this.makeGraphic(16, 32, 0xff5500ff);
+		}
+		
+		override public function kill():void
+		{
 			this.makeGraphic(16, 16, 0xff5500ff);
+		}
+		
+		public function startExcecution():void
+		{
+			this.alive = false;
+			this.velocity.x = 0;
+			this.makeGraphic(16, 32, 0xff5500ff);
 		}
 		
 		override public function update():void
@@ -39,28 +53,31 @@ package nl.basroding.hotel
 				_target = _path.target;
 			}
 			
-			if(_target != null)
+			if(alive)
 			{
-				if(_target.x > this.x)
-					this.velocity.x = WALK_SPEED;
-				else
-					this.velocity.x = -WALK_SPEED;
+				if(_target != null)
+				{
+					if(_target.x > this.x)
+						this.velocity.x = WALK_SPEED;
+					else
+						this.velocity.x = -WALK_SPEED;
+				}
+				
+				if(this.overlaps(_currentWaypoint))
+				{
+					_currentWaypoint = _route.nextTarget();
+					_path = Game.generatePath(this, _currentWaypoint as FlxObject);
+					_target = _path.target;
+				}
 			}
 			
-			if(this.overlaps(_currentWaypoint))
-			{
-				_currentWaypoint = _route.nextTarget();
-				_path = Game.generatePath(this, _currentWaypoint as FlxObject);
-				_target = _path.target;
-			}
 		}
 		
 		public function collideDoor(door:Door):void
 		{
 			if(door == _path.target)
 			{
-				this.x = door.connectingDoor.x;
-				this.y = door.connectingDoor.y + (door.connectingDoor.height - this.height);
+				this.useDoor(door);
 				_target = _path.nextTarget();
 			}
 		}

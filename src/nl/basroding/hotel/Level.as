@@ -8,12 +8,15 @@ package nl.basroding.hotel
 	
 	import org.flixel.FlxGroup;
 	import org.flixel.FlxObject;
+	import org.flixel.FlxPoint;
 
 	public class Level
 	{
 		private var _doors:FlxGroup
 		private var _rooms:FlxGroup;
 		private var _waypoints:FlxGroup;
+		private var _switches:FlxGroup;
+		private var _shadows:FlxGroup;
 		private var _matrix:AdjacencyMatrix;
 	
 		public function Level()
@@ -21,6 +24,8 @@ package nl.basroding.hotel
 			_doors = new FlxGroup();
 			_rooms = new FlxGroup();
 			_waypoints = new FlxGroup();
+			_shadows = new FlxGroup();
+			_switches = new FlxGroup();
 		}
 		
 		/**
@@ -131,6 +136,19 @@ package nl.basroding.hotel
 			
 			throw new Error("Object is not in a room");
 		}
+		
+		public function getRoomOfPosition(x:int, y:int):Room
+		{
+			var point:FlxPoint = new FlxPoint(x, y);
+			
+			for each(var room:Room in _rooms.members)
+			{
+				if(room.overlapsPoint(point))
+					return room;
+			}
+			
+			throw new Error("Position is not in a room");
+		}
 
 		public function get rooms():FlxGroup
 		{
@@ -150,6 +168,16 @@ package nl.basroding.hotel
 		public function get matrix():AdjacencyMatrix
 		{
 			return _matrix;
+		}
+
+		public function get shadows():FlxGroup
+		{
+			return _shadows;
+		}
+
+		public function get switches():FlxGroup
+		{
+			return _switches;
 		}
 
 

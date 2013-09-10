@@ -1,7 +1,7 @@
 package nl.basroding.hotel
 {
 	import org.flixel.*;
-	[SWF(width="1024", height="768", backgroundColor="#000000")]
+	[SWF(width="1024", height="600", backgroundColor="#ffffff")]
 	
 	public class Hotel extends FlxGame
 	{
