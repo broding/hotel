@@ -3,7 +3,7 @@ package nl.basroding.hotel
 	import nl.basroding.hotel.path.AdjacencyMatrix;
 	import nl.basroding.hotel.path.ConcreteWaypoint;
 	import nl.basroding.hotel.path.IWaypoint;
-	import nl.basroding.hotel.path.Pathfinder;
+	import nl.basroding.hotel.path.Dijkstra;
 	import nl.basroding.hotel.path.Route;
 	
 	import org.flixel.FlxGroup;
@@ -108,10 +108,7 @@ package nl.basroding.hotel
 		 * Create a route of a string containing waypoints id's, seperated by ,
 		 */
 		public function createRoute(waypoints:String):Route
-		{
-			if(waypoints.length == 0)
-				return new Route();
-			
+		{	
 			var route:Route = new Route();
 			
 			var split:Array = waypoints.split(",");

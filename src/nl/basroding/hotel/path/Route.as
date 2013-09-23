@@ -1,5 +1,7 @@
 package nl.basroding.hotel.path
 {
+	import nl.basroding.hotel.*;
+	
 	import org.flixel.FlxG;
 	import org.flixel.FlxObject;
 	
@@ -9,18 +11,41 @@ package nl.basroding.hotel.path
 	public class Route
 	{
 		private var _route:Array;
-		private var _currentIndex:int;
+		private var _path:Path;
+		private var _subject:FlxObject;
+		
+		private var _index:uint;
 		private var _completed:Boolean;
+		private var _callback:Function;
 		
 		public var loop:Boolean;
 		
-		public function Route(loop:Boolean = true)
+		public function Route(loop:Boolean = true, callback:Function = null)
 		{
 			this.loop = loop;
 			
 			_route = new Array();
-			_currentIndex = 0;
-			_completed = false;
+			_index = 0;
+			_completed = true;
+			_callback = callback;
+		}
+		
+		public function start(subject:FlxObject):void
+		{
+			if(_route.length > 0)
+			{
+				_subject = subject;
+				_completed = false;
+				_path = generatePath(_route[0]);
+			}
+			
+			if(_route.length == 1)
+				loop = false;
+		}
+		
+		private function generatePath(waypoint:IWaypoint):Path
+		{
+			return Game.generatePath(_subject, waypoint);
 		}
 		
 		public function addWaypoint(waypoint:IWaypoint):void
@@ -28,16 +53,34 @@ package nl.basroding.hotel.path
 			_route.push(waypoint);
 		}
 		
-		public function nextTarget():FlxObject
+		public function removeWaypoint(waypoint:IWaypoint):void
 		{
-			_currentIndex++;
+			_route = _route.splice(_route.indexOf(waypoint), 1);
+		}
+		
+		public function nextWaypoint():void
+		{
+			_path.nextTarget();
 			
-			_completed = _currentIndex + 1 == _route.length && !loop;
-			
-			if(loop && _currentIndex == _route.length)
-				_currentIndex = 0;
-			
-			return _route[_currentIndex];
+			if(_path.completed && !this._completed)
+			{
+				_index++;
+				
+				if(_index >= _route.length && !loop)
+				{	
+					_completed = true;
+					
+					if(_callback != null)
+						_callback.call();
+					
+					return;
+				}
+					
+				if(_index >= _route.length && loop)
+					_index = 0;
+					
+				_path = generatePath(_route[_index]);
+			}
 		}
 		
 		public function print():void
@@ -50,14 +93,20 @@ package nl.basroding.hotel.path
 			}
 		}
 		
-		public function get target():FlxObject
+		public function get target():IWaypoint
 		{
-			return _route[_currentIndex];
+			return _path.target;
 		}
 
 		public function get completed():Boolean
 		{
 			return _completed;
 		}
+
+		public function get callback():Function
+		{
+			return _callback;
+		}
+
 	}
 }

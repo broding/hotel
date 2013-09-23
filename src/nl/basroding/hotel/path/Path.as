@@ -15,21 +15,20 @@ package nl.basroding.hotel.path
 			_completed = false;
 		}
 		
-		public function addWaypoint(object:FlxObject):void
+		public function addWaypoint(object:IWaypoint):void
 		{
 			_path.push(object);
 		}
 		
-		public function nextTarget():FlxObject
+		public function nextTarget():void
 		{
 			_currentIndex++;
 			
-			_completed = _currentIndex + 1 == _path.length;
-			
-			return _path[_currentIndex];
+			if(_currentIndex >= _path.length)
+				_completed = true;
 		}
 		
-		public function get target():FlxObject
+		public function get target():IWaypoint
 		{
 			return _path[_currentIndex];
 		}

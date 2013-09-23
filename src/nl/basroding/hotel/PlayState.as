@@ -1,29 +1,38 @@
 package nl.basroding.hotel
 {
+	import com.greensock.events.LoaderEvent;
+	
 	import flash.events.Event;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	
 	import net.pixelpracht.tmx.*;
 	
+	import nl.basroding.hotel.actor.Guard;
+	import nl.basroding.hotel.actor.body.Skin;
+	import nl.basroding.hotel.actor.body.Body;
 	import nl.basroding.hotel.npc.BehaviorFactory;
+	import nl.basroding.hotel.npc.GuardBehavior;
 	import nl.basroding.hotel.npc.PanicBehavior;
 	import nl.basroding.hotel.path.AdjacencyMatrix;
 	import nl.basroding.hotel.path.ConcreteWaypoint;
 	
 	import org.flixel.*;
 	import org.flixel.system.FlxTile;
+	import nl.basroding.hotel.actor.body.SkinManager;
 
 	public class PlayState extends FlxState
 	{
-		[Embed(source="assets/tileset.png")] private var ImgTiles:Class;
+		[Embed(source="assets/levels/tileset.png")] private var ImgTiles:Class;
 		
-		private var fpsText:FlxText;
 		private var player:Player;
 		private var collideMap:FlxTilemap;
 		private var loaded:Boolean = false;
 		private var level:Level;
 		private var npcs:FlxGroup;
+		private var debugDraw:FlxGroup;
+		private var guiOverlay:GUIOverlay;
+		private var camera:FlxCamera;
 		
 		public function PlayState()
 		{
@@ -31,15 +40,38 @@ package nl.basroding.hotel
 		
 		override public function create():void
 		{
-			var loader:URLLoader = new URLLoader(); 
-			loader.addEventListener(Event.COMPLETE, onTmxLoaded); 
-			loader.load(new URLRequest('levels/level1.tmx')); 
+			camera = new FlxCamera(0, 0, 840/2, 525/2, 2);
+			FlxG.addCamera(camera);
+			FlxG.camera = camera;
 			
 			FlxG.visualDebug = false;
 			FlxG.worldBounds = new FlxRect(0, 0, 2000, 2000);
 			
 			level = new Level();
 			npcs = new FlxGroup();
+			debugDraw = new FlxGroup();
+			Game.debugGroup = debugDraw;
+			Game.drawDebug = true;
+			
+			var skinManager:SkinManager = new SkinManager(function(event:LoaderEvent):void
+			{
+				var loader:URLLoader = new URLLoader(); 
+				loader.addEventListener(Event.COMPLETE, onTmxLoaded); 
+				loader.load(new URLRequest('levels/level1.tmx')); 
+				
+				Game.skinManager = skinManager;
+				
+				skinManager.addSkin(new Skin("player", "player", "player", "gray"));
+				skinManager.addSkin(new Skin("guard", "guard", "guard", "gray"));
+				skinManager.addSkin(new Skin("guest", "player", "player", "gray"));
+			});
+			
+			skinManager.loadBodyPart(Body.HEAD, "player");
+			skinManager.loadBodyPart(Body.HEAD, "guard");
+			skinManager.loadBodyPart(Body.TORSO, "player");
+			skinManager.loadBodyPart(Body.TORSO, "guard");
+			skinManager.loadBodyPart(Body.FEET, "gray");
+			skinManager.startLoading();
 		}
 		
 		override public function update():void
@@ -48,12 +80,13 @@ package nl.basroding.hotel
 			
 			if(loaded)
 			{
-				fpsText.text = "FPS: " + 1 / FlxG.elapsed;
 				FlxG.collide(player, collideMap);
 				FlxG.collide(npcs, collideMap);
 				FlxG.overlap(player, level.doors, player.collideDoorHandler);
 				FlxG.overlap(player, npcs, player.collideNpcHandler);
 				FlxG.overlap(player, level.switches, player.collideSwitchHandler);
+				
+				Game.update();
 			}
 		}
 		
@@ -108,24 +141,29 @@ package nl.basroding.hotel
 				
 			FlxG.worldBounds = sprites.getBounds();
 			
-			player = new Player(500, 200, level.getRoomOfPosition(500, 200));
+			player = new Player(500, 336, level.getRoomOfPosition(500, 336));
 			player.x = 500;
-			player.y = 200;
+			player.y = 336;
+			Game.player = player;
 			
-			FlxG.camera.scroll.x = 300;
-			FlxG.camera.bounds = sprites.getBounds();
-			FlxG.camera.follow(player, FlxCamera.STYLE_PLATFORMER);
-		
-			fpsText = new FlxText(10, 10, 300, "FPS: 0");
-			fpsText.scrollFactor.x = 0;
-			fpsText.scrollFactor.y = 0;
+			FlxG.camera.follow(player, FlxCamera.STYLE_LOCKON);
+			
+			var lineSprite:FlxSprite = new FlxSprite(0, 0);
+			lineSprite.width = 2000;
+			lineSprite.height = 2000;
+			Game.lineSprite = lineSprite;
+			
+			guiOverlay = new GUIOverlay();
+			Game.guiOverlay = guiOverlay;
 			
 			add(level.doors);
 			add(level.switches);
 			add(npcs);
 			add(player);
 			add(level.shadows);
-			add(fpsText);
+			add(lineSprite);
+			add(debugDraw);
+			add(guiOverlay);
 			
 			loaded = true;
 		}
@@ -139,7 +177,7 @@ package nl.basroding.hotel
 					level.doors.add(door);
 					break;
 				case "room":
-					var room:Room = new Room(object.x, object.y, object.width, object.height);
+					var room:Room = new Room(object.x, object.y, object.width, object.height, object.custom["allowed"]);
 					level.rooms.add(room);
 					break;
 				case "waypoint":
@@ -154,11 +192,20 @@ package nl.basroding.hotel
 					var npc:Npc = new Npc(
 						object.x,
 						object.y,
+						Game.skinManager.getSkinByName("guest"),
 						level.getRoomOfPosition(object.x, object.y)
 					);
 					npc.behavior = BehaviorFactory.createBehavior(object.custom["type"], npc, level.createRoute(object.custom["waypoints"]));
-					//npc.behavior = new PanicBehavior(npc);
 					npcs.add(npc);
+					break;
+				case "guard":
+					var guard:Guard = new Guard(
+						object.x,
+						object.y,
+						level.getRoomOfPosition(object.x, object.y)
+					);
+					guard.behavior = new GuardBehavior(guard);
+					npcs.add(guard);
 					break;
 			}
 		}

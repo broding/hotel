@@ -5,13 +5,13 @@ package nl.basroding.hotel.path
 	
 	import org.flixel.FlxObject;
 
-	public class Pathfinder
+	public class Dijkstra
 	{
 		private const INFINITY:int = int.MAX_VALUE;
 		
 		private var _level:Level;
 		private var _subject:FlxObject;
-		private var _target:FlxObject;
+		private var _target:IWaypoint;
 		
 		private var _distance:Array;
 		private var _previous:Array;
@@ -22,7 +22,7 @@ package nl.basroding.hotel.path
 		
 		private var _path:Path;
 		
-		public function Pathfinder(level:Level, subject:FlxObject, target:FlxObject)
+		public function Dijkstra(level:Level, subject:FlxObject, target:IWaypoint)
 		{
 			_level = level;
 			_subject = subject;
@@ -31,7 +31,7 @@ package nl.basroding.hotel.path
 			_path = new Path();
 			
 			var subjectRoom:Room = _level.getRoomOfObject(subject);
-			var targetRoom:Room = _level.getRoomOfObject(target);
+			var targetRoom:Room = _level.getRoomOfPosition(target.getPosition().x, target.getPosition().y);
 			
 			if(subjectRoom == targetRoom)
 			{

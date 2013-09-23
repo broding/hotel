@@ -1,6 +1,6 @@
 package nl.basroding.hotel.npc
 {
-	import nl.basroding.hotel.Actor;
+	import nl.basroding.hotel.actor.Actor;
 	import nl.basroding.hotel.Door;
 	import nl.basroding.hotel.Npc;
 	import nl.basroding.hotel.Room;

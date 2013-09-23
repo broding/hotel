@@ -5,6 +5,7 @@
       <compilerSourcePathEntry kind="1" linkType="1" path="libs/flixel"/>
       <compilerSourcePathEntry kind="1" linkType="1" path="assets"/>
       <compilerSourcePathEntry kind="1" linkType="1" path="libs/tmx"/>
+      <compilerSourcePathEntry kind="1" linkType="1" path="libs/loadermax"/>
     </compilerSourcePath>
     <libraryPath defaultLinkType="0">
       <libraryPathEntry kind="4" path="">

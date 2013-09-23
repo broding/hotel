@@ -3,6 +3,7 @@ package nl.basroding.hotel.npc
 	import nl.basroding.hotel.*;
 	import nl.basroding.hotel.events.RoomEvent;
 	import nl.basroding.hotel.path.*;
+	import nl.basroding.hotel.actor.Actor;
 	
 	import org.flixel.FlxObject;
 
@@ -10,60 +11,30 @@ package nl.basroding.hotel.npc
 	{
 		private var _npc:Npc;
 		private var _route:Route;
-		private var _path:Path;
-		private var _target:FlxObject;
-		private var _currentWaypoint:FlxObject;
+		private var _currentWaypoint:IWaypoint;
 		
 		public function WaypointBehavior(npc:Npc, route:Route)
 		{
 			_npc = npc;
 			_route = route;
+			_route.start(_npc);
 		}
 		
 		public function update():void
 		{	
-			if(_currentWaypoint == null)
-				setWaypoint(_route.target);
-			
-			if(_target != null)
+			if(!_route.completed)
 			{
-				if(_target.x > _npc.x)
+				if(_route.target.getPosition().x > _npc.x)
 					_npc.velocity.x = Actor.WALK_SPEED;
 				else
 					_npc.velocity.x = -Actor.WALK_SPEED;
+				
+				if(_npc.overlaps(_route.target.getPosition()))
+					if(_route.target.useWaypoint(_npc))
+						_route.nextWaypoint();
 			}
-			
-			if(_npc.overlaps(_currentWaypoint))
-				setWaypoint(_route.nextTarget());
-			
-			if(_npc.overlaps(_target))
-			{
-				if(_target is Door)
-					useDoor(_target as Door);
-				else if(_target is Switch)
-					useSwitch(_target as Switch);
-			}
-		}
-		
-		private function setWaypoint(waypoint:FlxObject):void
-		{
-			_currentWaypoint = waypoint;
-			_path = Game.generatePath(_npc, _currentWaypoint as FlxObject);
-			_target = _path.target;
-		}
-		
-		private function useDoor(door:Door):void
-		{
-			if(door == _path.target)
-			{
-				_npc.useDoor(door);
-				_target = _path.nextTarget();
-			}
-		}
-		
-		private function useSwitch(mySwitch:Switch):void
-		{
-			mySwitch.toggle(_npc);
+			else
+				_npc.velocity.x = 0;
 		}
 		
 		public function onActorKilledInRoom(event:RoomEvent):void

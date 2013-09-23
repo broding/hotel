@@ -756,6 +756,50 @@ package org.flixel
 			return pixels;
 		}
 		
+		private static var bitmapIncrementer:int = 0;
+		static public function addBitmapFromBitmapData(bitmapData:BitmapData, Reverse:Boolean=false, Unique:Boolean=false, Key:String=null):BitmapData
+		{
+			var needReverse:Boolean = false;
+			
+			if(Key == null)
+			{
+				Key = String(bitmapIncrementer++)+(Reverse?"_REVERSE_":"");
+				if(Unique && checkBitmapCache(Key))
+				{
+					var inc:uint = 0;
+					var ukey:String;
+					do
+					{
+						ukey = Key + inc++;
+					} while(checkBitmapCache(ukey));
+					Key = ukey;
+				}
+			}
+			
+			//If there is no data for this key, generate the requested graphic
+			if(!checkBitmapCache(Key))
+			{
+				_cache[Key] = bitmapData;
+				if(Reverse)
+					needReverse = true;
+			}
+			var pixels:BitmapData = _cache[Key];
+			if(!needReverse && Reverse && (pixels.width == bitmapData.width))
+				needReverse = true;
+			if(needReverse)
+			{
+				var newPixels:BitmapData = new BitmapData(pixels.width<<1,pixels.height,true,0x00000000);
+				newPixels.draw(pixels);
+				var mtx:Matrix = new Matrix();
+				mtx.scale(-1,1);
+				mtx.translate(newPixels.width,0);
+				newPixels.draw(pixels,mtx);
+				pixels = newPixels;
+				_cache[Key] = pixels;
+			}
+			return pixels;
+		}
+		
 		/**
 		 * Dumps the cache's image references.
 		 */

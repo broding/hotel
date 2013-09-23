@@ -1,34 +1,54 @@
 package nl.basroding.hotel
 {
-	import org.flixel.*;
+	import nl.basroding.hotel.actor.Actor;
+	import nl.basroding.hotel.actor.body.Body;
 	import nl.basroding.hotel.util.ControlScheme;
+	
+	import org.flixel.*;
 
 	public class Player extends Actor
 	{
+		[Embed(source="assets/player.png")] private var playerSprite:Class;
+		
 		private var _excecuting:Boolean;
 		private var _excecutingNpc:Npc;
 		
 		public function Player(x:int, y:int, room:Room)
 		{
-			super(x, y, room);
+			super(x, y, Game.skinManager.getSkinByName("player"), room);
+			
+			FlxG.camera.follow(_body.cameraTarget);
 			
 			_excecuting = false;
 		}
 		
 		override public function update():void
 		{
-			super.update();
-			
 			if(FlxG.keys.pressed(ControlScheme.LEFT))
 				move(-1);
 			else if(FlxG.keys.pressed(ControlScheme.RIGHT))
 				move(1);
 			else
 				this.velocity.x = 0;
+			
+			playAnimation();
+			
+			super.update();
+		}
+		
+		private function playAnimation():void
+		{
+			if(velocity.x != 0)
+				play("walk");
+			else
+				play("still");
 		}
 		
 		private function move(direction:int):void
 		{
+			if(!alive || Game.freeze)
+				return;
+			
 			this.velocity.x = RUN_SPEED * direction;
 			
 			if(_excecuting)
@@ -74,6 +94,11 @@ package nl.basroding.hotel
 			{
 				mySwitch.toggle(this);
 			}
+		}
+		
+		override public function kill():void
+		{
+			this.alive = false;
 		}
 	}
 }

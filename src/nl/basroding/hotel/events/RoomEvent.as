@@ -1,6 +1,6 @@
 package nl.basroding.hotel.events
 {
-	import nl.basroding.hotel.Actor;
+	import nl.basroding.hotel.actor.Actor;
 	import nl.basroding.hotel.Switch;
 
 	public class RoomEvent

@@ -5,6 +5,8 @@ package nl.basroding.hotel
 	
 	import org.flixel.FlxObject;
 	import org.flixel.FlxSprite;
+	import nl.basroding.hotel.actor.Actor;
+	import nl.basroding.hotel.actor.body.Skin;
 
 	public class Room extends FlxObject implements ISwitchTarget
 	{
@@ -15,8 +17,9 @@ package nl.basroding.hotel
 		private var _actors:Array;
 		private var _listeners:Array;
 		private var _shadow:FlxSprite;
+		private var _allowedSkins:Array;
 		
-		public function Room(x:int, y:int, width:int, height:int)
+		public function Room(x:int, y:int, width:int, height:int, allowedSkins:String)
 		{
 			this.x = x;
 			this.y = y;
@@ -33,6 +36,19 @@ package nl.basroding.hotel
 			_shadow.y = y;
 			_shadow.alpha = 0.6;
 			_shadow.visible = false;
+			
+			if(allowedSkins == "") // if no allowedSkins is passed, allow all skins
+			{
+				_allowedSkins = Game.skinManager.skins;
+			}
+			else
+			{
+				_allowedSkins = new Array();
+				var skins:Array = allowedSkins.split(",");
+				
+				for each(var skinName:String in skins)
+					addAllowedSkin(Game.skinManager.getSkinByName(skinName));
+			}
 		}
 		
 		public function addListener(listener:IRoomListener):void
@@ -71,6 +87,18 @@ package nl.basroding.hotel
 			return false;
 		}
 		
+		public function hasDoorToRoom(room:Room):Boolean
+		{
+			for each(var localDoor:Door in _doors)
+			{
+				if(localDoor.targetRoom == room)
+					return true;
+			}
+			
+			return false;
+		}
+		
+		
 		public function getDoorToRoom(room:Room):Door
 		{
 			for each(var door:Door in _doors)
@@ -107,15 +135,12 @@ package nl.basroding.hotel
 		{
 			_shadow.visible = _shadow.visible ? false : true;
 			
-			if(!_shadow.visible) // if lights have been turned out
-			{
-				var event:RoomEvent = new RoomEvent();
-				event.changedSwitch = mySwitch;
-				event.switchOn = !_shadow.visible;
-				
-				for each(var listener:IRoomListener in _listeners)
-					(listener as IRoomListener).onLightSwitch(event);
-			}
+			var event:RoomEvent = new RoomEvent();
+			event.changedSwitch = mySwitch;
+			event.switchOn = !_shadow.visible;
+			
+			for each(var listener:IRoomListener in _listeners)
+				(listener as IRoomListener).onLightSwitch(event);
 		}
 		
 		public function hasDeadActor():Boolean
@@ -128,10 +153,31 @@ package nl.basroding.hotel
 			
 			return false;
 		}
+		
+		public function addAllowedSkin(skin:Skin):void
+		{
+			_allowedSkins.push(skin);
+		}
+		
+		public function isSkinAllowed(skin:Skin):Boolean
+		{
+			for each(var allowedSkin:Skin in _allowedSkins)
+			{
+				if(skin == allowedSkin)
+					return true;
+			}
+			
+			return false;
+		}
 
 		public function get shadow():FlxSprite
 		{
 			return _shadow;
+		}
+
+		public function get actors():Array
+		{
+			return _actors;
 		}
 
 		

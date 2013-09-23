@@ -2,6 +2,9 @@ package nl.basroding.hotel
 {
 	import net.pixelpracht.tmx.TmxPropertySet;
 	
+	import nl.basroding.hotel.actor.Actor;
+	import nl.basroding.hotel.actor.body.Body;
+	import nl.basroding.hotel.actor.body.Skin;
 	import nl.basroding.hotel.events.RoomEvent;
 	import nl.basroding.hotel.npc.DeadBehavior;
 	import nl.basroding.hotel.npc.IBehavior;
@@ -17,18 +20,11 @@ package nl.basroding.hotel
 		
 		private var _moving:Boolean;
 		
-		public function Npc(x:int, y:int, room:Room)
+		public function Npc(x:int, y:int, skin:Skin, room:Room)
 		{
-			super(x, y, room);
+			super(x, y, skin, room);
 			
-			_behavior = new DeadBehavior();
-			
-			this.makeGraphic(16, 32, 0xff5500ff);
-		}
-		
-		override public function kill():void
-		{
-			this.makeGraphic(16, 16, 0xff5500ff);
+			behavior = new DeadBehavior();
 		}
 		
 		public function startExcecution():void
@@ -36,9 +32,6 @@ package nl.basroding.hotel
 			this.behavior = new DeadBehavior();
 			this.alive = false;
 			this.velocity.x = 0;
-			this.makeGraphic(16, 32, 0xff5500ff);
-			
-			this._room.actorKilled(this);
 		}
 		
 		override public function update():void

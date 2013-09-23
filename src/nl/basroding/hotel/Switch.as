@@ -1,9 +1,13 @@
 package nl.basroding.hotel
 {
+	import nl.basroding.hotel.path.IWaypoint;
+	
 	import org.flixel.FlxObject;
+	import org.flixel.FlxPoint;
 	import org.flixel.FlxSprite;
+	import nl.basroding.hotel.actor.Actor;
 
-	public class Switch extends FlxSprite
+	public class Switch extends FlxSprite implements IWaypoint
 	{
 		private var _target:ISwitchTarget;
 		
@@ -20,5 +24,18 @@ package nl.basroding.hotel
 		{
 			_target.toggleSwitch(this);
 		}
+		
+		public function getPosition():FlxObject
+		{
+			return this;
+		}
+		
+		public function useWaypoint(actor:Actor):Boolean
+		{
+			this.toggle(actor);
+			
+			return true;
+		}
+		
 	}
 }

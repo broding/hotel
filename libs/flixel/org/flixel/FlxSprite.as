@@ -82,9 +82,6 @@ package org.flixel
 		 * Internal, stores all the animations that were added to this sprite.
 		 */
 		protected var _animations:Array;
-		/**
-		 * Internal, keeps track of whether the sprite was loaded with support for automatic reverse/mirroring.
-		 */
 		protected var _flipped:uint;
 		/**
 		 * Internal, keeps track of the current animation being played.
@@ -916,5 +913,22 @@ package org.flixel
 				_callback(((_curAnim != null)?(_curAnim.name):null),_curFrame,_curIndex);
 			dirty = false;
 		}
+
+		/**
+		 * Internal, keeps track of whether the sprite was loaded with support for automatic reverse/mirroring.
+		 */
+		public function get flipped():uint
+		{
+			return _flipped;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set flipped(value:uint):void
+		{
+			_flipped = value;
+		}
+
 	}
 }
