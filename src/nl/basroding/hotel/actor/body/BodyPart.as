@@ -21,17 +21,24 @@ package nl.basroding.hotel.actor.body
 		{
 			_skin = skin;
 			
+			_xOffset = offsetX;
+			_yOffset = offsetY;
+			
+			this.frameWidth = width;
+			this.frameHeight = height;
+			
+			loadBitmapData(bitmap);
+			
+		}
+		
+		public function loadBitmapData(bitmap:BitmapData):void
+		{
 			_pixels = FlxG.addBitmapFromBitmapData(bitmap, true);
 			this.flipped = _pixels.width>>1;
 			
 			this.width = _pixels.width;
 			this.height = _pixels.height;
-			this.frameWidth = width;
-			this.frameHeight = height;
 			resetHelpers();
-			
-			_xOffset = offsetX;
-			_yOffset = offsetY;
 		}
 		
 		public function setActorPosition(x:int, y:int, facing:uint):void

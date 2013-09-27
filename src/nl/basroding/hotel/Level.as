@@ -2,8 +2,6 @@ package nl.basroding.hotel
 {
 	import nl.basroding.hotel.path.AdjacencyMatrix;
 	import nl.basroding.hotel.path.ConcreteWaypoint;
-	import nl.basroding.hotel.path.IWaypoint;
-	import nl.basroding.hotel.path.Dijkstra;
 	import nl.basroding.hotel.path.Route;
 	
 	import org.flixel.FlxGroup;
@@ -12,13 +10,14 @@ package nl.basroding.hotel
 
 	public class Level
 	{
-		private var _doors:FlxGroup
+		private var _doors:FlxGroup;
 		private var _rooms:FlxGroup;
 		private var _waypoints:FlxGroup;
 		private var _switches:FlxGroup;
 		private var _shadows:FlxGroup;
 		private var _matrix:AdjacencyMatrix;
-	
+		private var _lights:FlxGroup;
+		
 		public function Level()
 		{
 			_doors = new FlxGroup();
@@ -26,8 +25,14 @@ package nl.basroding.hotel
 			_waypoints = new FlxGroup();
 			_shadows = new FlxGroup();
 			_switches = new FlxGroup();
+			_lights = new FlxGroup();
 		}
 		
+		public function get lights():FlxGroup
+		{
+			return _lights;
+		}
+
 		/**
 		 * Connects all doors with eachother
 		 */
@@ -148,6 +153,12 @@ package nl.basroding.hotel
 			}
 			
 			throw new Error("Position is not in a room");
+		}
+		
+		public function addLight(light:Light):void
+		{
+			_lights.add(light);
+			this.getRoomOfObject(light).lights.add(light);
 		}
 
 		public function get rooms():FlxGroup

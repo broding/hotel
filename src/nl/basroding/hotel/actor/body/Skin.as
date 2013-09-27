@@ -2,8 +2,9 @@ package nl.basroding.hotel.actor.body
 {
 	import flash.display.BitmapData;
 	
-	import org.flixel.FlxSprite;
 	import nl.basroding.hotel.Game;
+	
+	import org.flixel.FlxSprite;
 
 	public class Skin
 	{

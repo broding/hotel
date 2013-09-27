@@ -3,13 +3,12 @@ package nl.basroding.hotel
 	import nl.basroding.hotel.path.IWaypoint;
 	
 	import org.flixel.FlxObject;
-	import org.flixel.FlxPoint;
 	import org.flixel.FlxSprite;
 	import nl.basroding.hotel.actor.Actor;
 
 	public class Door extends FlxSprite implements IWaypoint
 	{
-		[Embed(source="assets/levels/door.png")] private var doorClass:Class;
+		[Embed(source="../../../../assets/levels/door.png")] private var doorClass:Class;
 		
 		private var _connectingDoorId:int;
 		private var _connectingDoor:Door;

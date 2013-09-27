@@ -1,15 +1,13 @@
 package nl.basroding.hotel
 {
 	import nl.basroding.hotel.actor.Actor;
-	import nl.basroding.hotel.actor.body.Body;
+	import nl.basroding.hotel.actor.body.Skin;
 	import nl.basroding.hotel.util.ControlScheme;
 	
-	import org.flixel.*;
+	import org.flixel.FlxG;
 
 	public class Player extends Actor
-	{
-		[Embed(source="assets/player.png")] private var playerSprite:Class;
-		
+	{	
 		private var _excecuting:Boolean;
 		private var _excecutingNpc:Npc;
 		
@@ -69,7 +67,12 @@ package nl.basroding.hotel
 		public function collideNpcHandler(player:Player, npc:Npc):void
 		{
 			if(!npc.alive)
+			{
+				if(FlxG.keys.justPressed(ControlScheme.EXECUTE) && !npc.isNaked())
+					this.swapSkin(npc);	
+				
 				return;
+			}
 			
 			if(FlxG.keys.justPressed(ControlScheme.EXECUTE))
 			{
@@ -86,6 +89,15 @@ package nl.basroding.hotel
 				_excecutingNpc = npc;
 				_excecuting = true;
 			}
+		}
+		
+		private function swapSkin(actor:Actor):void
+		{
+			var playerSkin:Skin = skin;
+			
+			_body.swapCloths(actor.skin);
+			
+			actor.getNaked();
 		}
 		
 		public function collideSwitchHandler(player:Player, mySwitch:Switch):void

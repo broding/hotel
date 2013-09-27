@@ -1,13 +1,11 @@
 package nl.basroding.hotel.actor
 {
 	import nl.basroding.hotel.Door;
+	import nl.basroding.hotel.Game;
 	import nl.basroding.hotel.Room;
 	import nl.basroding.hotel.actor.body.Body;
 	import nl.basroding.hotel.actor.body.Skin;
-	import nl.basroding.hotel.events.IRoomListener;
-	import nl.basroding.hotel.events.RoomEvent;
 	
-	import org.flixel.FlxGroup;
 	import org.flixel.FlxSprite;
 
 	public class Actor extends FlxSprite
@@ -34,6 +32,13 @@ package nl.basroding.hotel.actor
 		{
 			_room = value;
 			_room.addActor(this);
+		}
+		
+		public function getNaked():void
+		{
+			var skin:Skin = Game.skinManager.getSkinByName("naked");
+			
+			_body.swapCloths(skin);
 		}
 
 		override public function update():void
@@ -101,6 +106,9 @@ package nl.basroding.hotel.actor
 			return _body.skin;
 		}
 
-
+		public function isNaked():Boolean
+		{
+			return _body.skinName == "naked";
+		}
 	}
 }

@@ -6,29 +6,36 @@ package nl.basroding.hotel
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	
-	import net.pixelpracht.tmx.*;
+	import net.pixelpracht.tmx.TmxMap;
+	import net.pixelpracht.tmx.TmxObject;
+	import net.pixelpracht.tmx.TmxObjectGroup;
 	
 	import nl.basroding.hotel.actor.Guard;
-	import nl.basroding.hotel.actor.body.Skin;
 	import nl.basroding.hotel.actor.body.Body;
+	import nl.basroding.hotel.actor.body.Skin;
+	import nl.basroding.hotel.actor.body.SkinManager;
 	import nl.basroding.hotel.npc.BehaviorFactory;
 	import nl.basroding.hotel.npc.GuardBehavior;
-	import nl.basroding.hotel.npc.PanicBehavior;
-	import nl.basroding.hotel.path.AdjacencyMatrix;
 	import nl.basroding.hotel.path.ConcreteWaypoint;
 	
-	import org.flixel.*;
-	import org.flixel.system.FlxTile;
-	import nl.basroding.hotel.actor.body.SkinManager;
+	import org.flixel.FlxCamera;
+	import org.flixel.FlxG;
+	import org.flixel.FlxGroup;
+	import org.flixel.FlxRect;
+	import org.flixel.FlxSprite;
+	import org.flixel.FlxState;
+	import org.flixel.FlxTilemap;
 
 	public class PlayState extends FlxState
 	{
-		[Embed(source="assets/levels/tileset.png")] private var ImgTiles:Class;
+		[Embed(source="../../../../assets/levels/tileset.png")] private var tilesetGraphic:Class;
+		[Embed(source="../../../../assets/levels/shadows.png")] private var shadowsGraphic:Class;
 		
 		private var player:Player;
 		private var collideMap:FlxTilemap;
 		private var loaded:Boolean = false;
 		private var level:Level;
+		private var shadows:FlxTilemap;
 		private var npcs:FlxGroup;
 		private var debugDraw:FlxGroup;
 		private var guiOverlay:GUIOverlay;
@@ -64,12 +71,14 @@ package nl.basroding.hotel
 				skinManager.addSkin(new Skin("player", "player", "player", "gray"));
 				skinManager.addSkin(new Skin("guard", "guard", "guard", "gray"));
 				skinManager.addSkin(new Skin("guest", "player", "player", "gray"));
+				skinManager.addSkin(new Skin("naked", "player", "naked", "gray"));
 			});
 			
 			skinManager.loadBodyPart(Body.HEAD, "player");
 			skinManager.loadBodyPart(Body.HEAD, "guard");
 			skinManager.loadBodyPart(Body.TORSO, "player");
 			skinManager.loadBodyPart(Body.TORSO, "guard");
+			skinManager.loadBodyPart(Body.TORSO, "naked");
 			skinManager.loadBodyPart(Body.FEET, "gray");
 			skinManager.startLoading();
 		}
@@ -101,15 +110,20 @@ package nl.basroding.hotel
 		{	
 			//Basic level structure
 			var sprites:FlxTilemap = new FlxTilemap();
+			var shadows:FlxTilemap = new FlxTilemap();
 			//generate a CSV from the layer 'map' with all the tiles from the TileSet 'tiles'
 			var mapCsv:String = tmx.getLayer('map').toCsv(tmx.getTileSet('tileset'));
-			sprites.loadMap(mapCsv,ImgTiles, 16, 16);
+			sprites.loadMap(mapCsv,tilesetGraphic, 16, 16);
 			sprites.follow();
 			add(sprites);
 			
+			var shadowCsv:String = tmx.getLayer('shadows').toCsv(tmx.getTileSet('shadows'));
+			shadows.loadMap(shadowCsv,shadowsGraphic, 16, 16);
+			add(shadows);
+			
 			collideMap = new FlxTilemap();
 			mapCsv = tmx.getLayer('collisions').toCsv(tmx.getTileSet('tileset'));
-			collideMap.loadMap(mapCsv, ImgTiles, 16, 16);
+			collideMap.loadMap(mapCsv, tilesetGraphic, 16, 16);
 			
 			// spawn objects
 			var group:TmxObjectGroup = tmx.getObjectGroup('structure');
@@ -122,6 +136,10 @@ package nl.basroding.hotel
 				
 			group = tmx.getObjectGroup('switch');
 			for each(object in group.objects)
+				spawnObject(object);
+				
+			group = tmx.getObjectGroup('lights');
+				for each(object in group.objects)
 				spawnObject(object);
 				
 			// process level further
@@ -137,7 +155,6 @@ package nl.basroding.hotel
 			// add all shadows
 			for each(var room:Room in level.rooms.members)
 				level.shadows.add(room.shadow);
-				
 				
 			FlxG.worldBounds = sprites.getBounds();
 			
@@ -160,6 +177,7 @@ package nl.basroding.hotel
 			add(level.switches);
 			add(npcs);
 			add(player);
+			add(level.lights);
 			add(level.shadows);
 			add(lineSprite);
 			add(debugDraw);
@@ -175,6 +193,11 @@ package nl.basroding.hotel
 				case "door":
 					var door:Door = new Door(object.x, object.y, object.custom["id"], object.custom["connecting"]);
 					level.doors.add(door);
+					break;
+				case "light":
+					var roomOfLight:Room = level.getRoomOfPosition(object.x, object.y);
+					var light:Light = new Light(roomOfLight, object.x, object.y);
+					level.addLight(light);
 					break;
 				case "room":
 					var room:Room = new Room(object.x, object.y, object.width, object.height, object.custom["allowed"]);

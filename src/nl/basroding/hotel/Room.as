@@ -1,12 +1,13 @@
 package nl.basroding.hotel
 {
+	import nl.basroding.hotel.actor.Actor;
+	import nl.basroding.hotel.actor.body.Skin;
 	import nl.basroding.hotel.events.IRoomListener;
 	import nl.basroding.hotel.events.RoomEvent;
 	
+	import org.flixel.FlxGroup;
 	import org.flixel.FlxObject;
 	import org.flixel.FlxSprite;
-	import nl.basroding.hotel.actor.Actor;
-	import nl.basroding.hotel.actor.body.Skin;
 
 	public class Room extends FlxObject implements ISwitchTarget
 	{
@@ -14,6 +15,7 @@ package nl.basroding.hotel
 		
 		private var _id:int;
 		private var _doors:Array;
+		private var _lights:FlxGroup;
 		private var _actors:Array;
 		private var _listeners:Array;
 		private var _shadow:FlxSprite;
@@ -26,6 +28,7 @@ package nl.basroding.hotel
 			this.width = width;
 			this.height = height;
 			
+			_lights = new FlxGroup();
 			_listeners = new Array();
 			_id = _uniqueId++;
 			_doors = new Array();
@@ -51,6 +54,11 @@ package nl.basroding.hotel
 			}
 		}
 		
+		public function get lights():FlxGroup
+		{
+			return _lights;
+		}
+
 		public function addListener(listener:IRoomListener):void
 		{
 			_listeners.push(listener);
@@ -138,6 +146,9 @@ package nl.basroding.hotel
 			var event:RoomEvent = new RoomEvent();
 			event.changedSwitch = mySwitch;
 			event.switchOn = !_shadow.visible;
+			
+			for each(var light:Light in _lights.members)
+				light.visible = !_shadow.visible;
 			
 			for each(var listener:IRoomListener in _listeners)
 				(listener as IRoomListener).onLightSwitch(event);

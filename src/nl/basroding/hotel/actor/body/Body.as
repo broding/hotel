@@ -1,7 +1,9 @@
 package nl.basroding.hotel.actor.body
 {
 	
-	import org.flixel.*;
+	import org.flixel.FlxG;
+	import org.flixel.FlxGroup;
+	import org.flixel.FlxObject;
 
 	public class Body extends FlxGroup
 	{
@@ -25,8 +27,13 @@ package nl.basroding.hotel.actor.body
 		private var _torso:Torso;
 		private var _feet:Feet;
 		
+		private var _skinName:String;
+		
 		public function Body(skin:Skin)
 		{
+			_skin = skin;
+			_skinName = skin.name;
+			
 			add(_head = new Head(skin));
 			add(_torso = new Torso(skin));
 			add(_feet = new Feet(skin));
@@ -36,6 +43,11 @@ package nl.basroding.hotel.actor.body
 			_animation = AnimationFactory.createDummy();
 		}
 		
+		public function get skinName():String
+		{
+			return _skinName;
+		}
+
 		override public function update():void
 		{
 			if(_animation == null)
@@ -79,6 +91,14 @@ package nl.basroding.hotel.actor.body
 		public function get skin():Skin
 		{
 			return _skin;
+		}
+		
+		public function swapCloths(skin:Skin):void
+		{
+			_torso.loadBitmapData(skin.torsoBitmapData);
+			_feet.loadBitmapData(skin.feetBitmapData);
+			
+			_skinName = skin.name;
 		}
 
 		public function get animation():BodyAnimation
